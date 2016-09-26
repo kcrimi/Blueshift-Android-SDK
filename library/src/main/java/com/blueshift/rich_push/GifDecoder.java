@@ -2,6 +2,7 @@ package com.blueshift.rich_push;
 
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.Config;
+import android.util.Log;
 
 import java.io.InputStream;
 import java.util.Vector;
@@ -23,6 +24,7 @@ public class GifDecoder {
      * max decoder pixel stack size
      */
     private static final int MAX_STACK_SIZE = 4096;
+    private static final String LOG_TAG = "GifDecoder";
     protected InputStream in;
     protected int height; // full image height
     protected Bitmap image; // current frame
@@ -223,7 +225,8 @@ public class GifDecoder {
             if (is != null) {
                 is.close();
             }
-        } catch (Exception ignore) {
+        } catch (Exception e) {
+            Log.e(LOG_TAG, "read(InputStream) - " + e.getMessage());
         }
         return status;
     }
@@ -363,6 +366,8 @@ public class GifDecoder {
                 curByte = in.read();
             }
         } catch (Exception e) {
+            Log.e(LOG_TAG, "read() - " + e.getMessage());
+
             status = STATUS_FORMAT_ERROR;
         }
         return curByte;
@@ -389,7 +394,7 @@ public class GifDecoder {
                     }
                 }
             } catch (Exception e) {
-                e.printStackTrace();
+                Log.e(LOG_TAG, "readBlock() - " + e.getMessage());
             }
             if (n < blockSize) {
                 status = STATUS_FORMAT_ERROR;
@@ -414,7 +419,7 @@ public class GifDecoder {
                 n = in.read(c);
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            Log.e(LOG_TAG, "readColorTable(int) - " + e.getMessage());
         }
         if (n < nbytes) {
             status = STATUS_FORMAT_ERROR;
