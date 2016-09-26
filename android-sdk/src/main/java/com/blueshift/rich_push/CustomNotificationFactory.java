@@ -380,4 +380,68 @@ public class CustomNotificationFactory {
 
         return PendingIntent.getService(context, 0, delIntent, PendingIntent.FLAG_ONE_SHOT);
     }
+
+    public void createAndShowGIFNotification(Context context, Message message) {
+        createAndShowGIFNotification(context, message, false, 0);
+    }
+
+    public void createAndShowGIFNotification(Context context, Message message, boolean isUpdating, int frameIndex) {
+        NotificationCompat.Builder builder = createBasicNotification(context, message);
+        if (builder != null) {
+
+            if (isUpdating) {
+                builder.setDefaults(0);
+            }
+
+            Notification notification = builder.build();
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+
+                GifFrameData[] gifFrameData = NotificationUtils.getCachedFrameData(context, message);
+
+                if (gifFrameData == null) {
+                    NotificationUtils.downloadAndCacheGifFrames(context, message);
+                    gifFrameData = NotificationUtils.getCachedFrameData(context, message);
+                }
+
+                if (gifFrameData != null && gifFrameData.length > frameIndex) {
+                    Bitmap bitmap = NotificationUtils.getCachedGifFrame(context, gifFrameData[frameIndex]);
+
+                    notification.bigContentView = createGIFNotification(context, message, bitmap);
+                }
+            }
+
+            builder.setDeleteIntent(getNotificationDeleteIntent(context, message));
+
+            NotificationManager manager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+            manager.notify(message.getCategory().getNotificationId(), notification);
+        }
+    }
+
+    private RemoteViews createGIFNotification(Context context, Message message, Bitmap bitmap) {
+        RemoteViews bigContentView = new RemoteViews(context.getPackageName(), R.layout.gif_notification_layout);
+
+        // fill in basic notification details like title, body etc
+        setBasicNotificationData(context, message, bigContentView);
+
+        if (bitmap != null) {
+            bigContentView.setImageViewBitmap(R.id.gif_big_picture, bitmap);
+
+            bigContentView.setOnClickPendingIntent(
+                    R.id.gif_play_button,
+                    getGifPlaybackPendingIntent(context, message)
+            );
+        }
+
+        return bigContentView;
+    }
+
+    private PendingIntent getGifPlaybackPendingIntent(Context context, Message message) {
+        Intent intent = new Intent(context, NotificationWorker.class);
+        intent.setAction(NotificationWorker.ACTION_PLAY_GIF);
+
+        intent.putExtra(RichPushConstants.EXTRA_MESSAGE, message);
+
+        return PendingIntent.getService(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+    }
 }

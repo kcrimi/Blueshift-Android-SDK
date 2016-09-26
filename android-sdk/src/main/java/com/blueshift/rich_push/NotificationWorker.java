@@ -3,6 +3,8 @@ package com.blueshift.rich_push;
 import android.app.IntentService;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.os.AsyncTask;
 
 import com.blueshift.util.NotificationUtils;
 
@@ -15,6 +17,7 @@ public class NotificationWorker extends IntentService {
 
     public static final String ACTION_CAROUSEL_IMG_CHANGE = "carousel_image_change";
     public static final String ACTION_NOTIFICATION_DELETE = "notification_delete";
+    public static final String ACTION_PLAY_GIF = "play_gif";
 
     /**
      * Creates an IntentService.  Invoked by your subclass's constructor.
@@ -52,6 +55,10 @@ public class NotificationWorker extends IntentService {
                 NotificationUtils.removeCachedCarouselImages(this, message);
 
                 break;
+
+            case ACTION_PLAY_GIF:
+                playGifNotification(getApplicationContext(), message);
+                break;
         }
     }
 
@@ -59,5 +66,22 @@ public class NotificationWorker extends IntentService {
         CustomNotificationFactory
                 .getInstance()
                 .createAndShowCarousel(context, message, true, newIndex);
+    }
+
+    private void playGifNotification(Context context, Message message) {
+        GifFrameData[] gifFrameData = NotificationUtils.getCachedFrameData(context, message);
+        int frameIndex = 0;
+
+        for (GifFrameData frameData : gifFrameData) {
+            CustomNotificationFactory
+                    .getInstance()
+                    .createAndShowGIFNotification(context, message, true, frameIndex++);
+
+            try {
+                Thread.sleep(frameData.getDelay());
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
     }
 }

@@ -228,6 +228,7 @@ public class RichPushNotification {
                     break;
 
                 case GifNotification:
+                    notificationFactory.createAndShowGIFNotification(context, message);
                     break;
             }
         }

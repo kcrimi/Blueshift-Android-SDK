@@ -9,4 +9,6 @@
     <string name="big_picture">Big picture</string>
     <string name="gps_not_found_msg">Could not fetch AdvertisingId. Please make sure that Google Play services 4.0+ is included in your project. Visit \"https://developer.android.com/google/play-services/setup.html\" for help.</string>
     <string name="install_gps_app_toast_msg">Please install/update Google Play services.</string>
+    <string name="gif_notification_image">Gif Notification Image</string>
+    <string name="gif_notification_play_button">Gif Notification Play Button</string>
 </resources>
