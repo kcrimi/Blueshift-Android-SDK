@@ -359,7 +359,9 @@ public class GifDecoder {
     private int read() {
         int curByte = 0;
         try {
-            curByte = in.read();
+            if (in != null) {
+                curByte = in.read();
+            }
         } catch (Exception e) {
             status = STATUS_FORMAT_ERROR;
         }
@@ -376,13 +378,15 @@ public class GifDecoder {
         int n = 0;
         if (blockSize > 0) {
             try {
-                int count; // initial value will be 0
-                while (n < blockSize) {
-                    count = in.read(block, n, blockSize - n);
-                    if (count == -1) {
-                        break;
+                if (in != null) {
+                    int count; // initial value will be 0
+                    while (n < blockSize) {
+                        count = in.read(block, n, blockSize - n);
+                        if (count == -1) {
+                            break;
+                        }
+                        n += count;
                     }
-                    n += count;
                 }
             } catch (Exception e) {
                 e.printStackTrace();
@@ -406,7 +410,9 @@ public class GifDecoder {
         byte[] c = new byte[nbytes];
         int n = 0;
         try {
-            n = in.read(c);
+            if (in != null) {
+                n = in.read(c);
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -639,4 +645,3 @@ public class GifDecoder {
         }
     }
 }
-
