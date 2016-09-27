@@ -9,7 +9,7 @@ import android.util.Log;
 
 import com.blueshift.rich_push.CarouselElement;
 import com.blueshift.rich_push.GifDecoder;
-import com.blueshift.rich_push.GifFrameData;
+import com.blueshift.rich_push.GifFrameMetaData;
 import com.blueshift.rich_push.Message;
 import com.google.gson.Gson;
 
@@ -20,7 +20,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Collections;
 
 /**
  * A class with helper methods to show custom notification.
@@ -43,6 +42,13 @@ public class NotificationUtils {
         return url.substring(url.lastIndexOf('/') + 1);
     }
 
+    /**
+     * This method will first downloads the GIF image and then decode it to get it's individual frames as bitmap.
+     * Then the bitmaps are stored locally inside private files location of the host app.
+     *
+     * @param context valid {@link Context} object
+     * @param message valid {@link Message} object
+     */
     public static void downloadAndCacheGifFrames(Context context, Message message) {
         if (context != null && message != null) {
             String imageUrl = message.getImage_url();
@@ -58,9 +64,11 @@ public class NotificationUtils {
 
                     String gifImageFileName = getImageFileName(imageUrl);
                     int frameCount = gifDecoder.getFrameCount();
+
+                    // frameIndex is the index of frames stored locally.
                     int frameIndex = 0;
 
-                    ArrayList<GifFrameData> gifFrameData = new ArrayList<>();
+                    ArrayList<GifFrameMetaData> gifFrameMetaData = new ArrayList<>();
 
                     for (int currentFrameIndex = 0; currentFrameIndex < frameCount; currentFrameIndex++) {
                         Bitmap currentFrame = gifDecoder.getFrame(currentFrameIndex);
@@ -72,17 +80,18 @@ public class NotificationUtils {
                                 String fileName = System.currentTimeMillis() + "-" + gifImageFileName;
                                 saveImageInDisc(context, currentFrame, fileName);
 
-                                GifFrameData frameData = new GifFrameData(frameIndex, delayInMillis, fileName);
-                                gifFrameData.add(frameData);
+                                // store the meta data of the file stored locally
+                                GifFrameMetaData frameData = new GifFrameMetaData(frameIndex, delayInMillis, fileName);
+                                gifFrameMetaData.add(frameData);
 
                                 frameIndex++;
                             }
                         }
                     }
 
-                    if (gifFrameData.size() > 0) {
-                        // cache the meta data about frames downloaded
-                        saveGifFrameData(context, message, gifFrameData);
+                    if (gifFrameMetaData.size() > 0) {
+                        // cache the meta data about frames stored locally
+                        cacheGifFramesMetaData(context, message, gifFrameMetaData);
                     }
                 } catch (IOException e) {
                     Log.e(LOG_TAG, "Could not decode GIF image. " + e.getMessage());
@@ -99,37 +108,19 @@ public class NotificationUtils {
         return context.getPackageName() + "." + fileName;
     }
 
-    private static void saveGifFrameData(Context context, Message message, ArrayList<GifFrameData> gifFrameDatas) {
+    private static void cacheGifFramesMetaData(Context context, Message message, ArrayList<GifFrameMetaData> gifFrameMetaDataList) {
         if (message != null) {
             String gifFileName = getImageFileName(message.getImage_url());
             if (context != null && !TextUtils.isEmpty(gifFileName)) {
                 context.getSharedPreferences(PREF_FILE(context), Context.MODE_PRIVATE)
                         .edit()
-                        .putString(PREF_KEY(context, gifFileName), new Gson().toJson(gifFrameDatas))
+                        .putString(PREF_KEY(context, gifFileName), new Gson().toJson(gifFrameMetaDataList))
                         .apply();
             }
         }
     }
 
-    public static GifFrameData[] getCachedFrameData(Context context, Message message) {
-        GifFrameData[] gifFrameData = null;
-
-        if (message != null) {
-            String fileName = getImageFileName(message.getImage_url());
-            if (context != null && !TextUtils.isEmpty(fileName)) {
-                String json = context.getSharedPreferences(PREF_FILE(context), Context.MODE_PRIVATE)
-                        .getString(PREF_KEY(context, fileName), null);
-
-                if (!TextUtils.isEmpty(json)) {
-                    gifFrameData = new Gson().fromJson(json, GifFrameData[].class);
-                }
-            }
-        }
-
-        return gifFrameData;
-    }
-
-    public static void deleteCachedFrameData(Context context, Message message) {
+    public static void deleteCachedGifFramesMetaData(Context context, Message message) {
         if (message != null) {
             String fileName = getImageFileName(message.getImage_url());
             if (context != null && !TextUtils.isEmpty(fileName)) {
@@ -141,13 +132,59 @@ public class NotificationUtils {
         }
     }
 
-    public static Bitmap getCachedGifFrame(Context context, GifFrameData metaData) {
+    public static GifFrameMetaData[] getCachedGifFramesMetaData(Context context, Message message) {
+        GifFrameMetaData[] gifFrameMetaDataArray = null;
+
+        if (message != null) {
+            String fileName = getImageFileName(message.getImage_url());
+            if (context != null && !TextUtils.isEmpty(fileName)) {
+                String json = context.getSharedPreferences(PREF_FILE(context), Context.MODE_PRIVATE)
+                        .getString(PREF_KEY(context, fileName), null);
+
+                if (!TextUtils.isEmpty(json)) {
+                    try {
+                        gifFrameMetaDataArray = new Gson().fromJson(json, GifFrameMetaData[].class);
+                    } catch (Exception e) {
+                        Log.e(LOG_TAG, "Could not decode JSON. " + e.getMessage());
+                    }
+                }
+            }
+        }
+
+        return gifFrameMetaDataArray;
+    }
+
+    /**
+     * Load bitmap from private files with the filename mentioned inside metadata
+     *
+     * @param context  valid {@link Context} object to get private files location
+     * @param metaData the meta data of the stored bitmap frame
+     * @return valid bitmap image if available, else null
+     */
+    public static Bitmap getCachedGifFrameBitmap(Context context, GifFrameMetaData metaData) {
         Bitmap bitmap = null;
+
         if (context != null && metaData != null) {
             bitmap = loadImageFromDisc(context, metaData.getFileName());
         }
 
         return bitmap;
+    }
+
+    /**
+     * Delete all cached bitmap images for the GIF mentioned inside {@link Message} object
+     *
+     * @param context valid {@link Context} object to get private files location
+     * @param message valid {@link Message} object to get GIF file URL
+     */
+    public static void deleteCachedGifFrameBitmaps(Context context, Message message) {
+        GifFrameMetaData[] gifFrameMetaData = getCachedGifFramesMetaData(context, message);
+
+        if (gifFrameMetaData != null) {
+            for (GifFrameMetaData frameData : gifFrameMetaData) {
+                removeImageFromDisc(context, frameData.getFileName());
+            }
+        }
     }
 
     /**
@@ -207,6 +244,13 @@ public class NotificationUtils {
         return resizedBitmap;
     }
 
+    /**
+     * This method saves a given bitmap file with a given name inside private files area of the host app.
+     *
+     * @param context  {@link Context} object to get private file location
+     * @param bitmap   {@link Bitmap} image to be stored
+     * @param fileName filename for storing the bitmap file
+     */
     public static void saveImageInDisc(Context context, Bitmap bitmap, String fileName) {
         if (context != null && bitmap != null && !TextUtils.isEmpty(fileName)) {
             FileOutputStream fileOutputStream = null;
@@ -214,14 +258,15 @@ public class NotificationUtils {
             try {
                 fileOutputStream = context.openFileOutput(fileName, Context.MODE_PRIVATE);
                 bitmap.compress(Bitmap.CompressFormat.PNG, 100, fileOutputStream);
+                Log.i(LOG_TAG, "Saved file: " + fileName);
             } catch (FileNotFoundException e) {
-                e.printStackTrace();
+                Log.e(LOG_TAG, "File not found. " + e.getMessage());
             } finally {
                 if (fileOutputStream != null) {
                     try {
                         fileOutputStream.close();
                     } catch (IOException e) {
-                        e.printStackTrace();
+                        Log.e(LOG_TAG, "Could not close fileOutputStream. " + e.getMessage());
                     }
                 }
             }
@@ -244,7 +289,7 @@ public class NotificationUtils {
                 InputStream inputStream = context.openFileInput(fileName);
                 bitmap = BitmapFactory.decodeStream(inputStream);
             } catch (FileNotFoundException e) {
-                e.printStackTrace();
+                Log.e(LOG_TAG, "File not found. " + e.getMessage());
             }
         }
 
@@ -259,7 +304,9 @@ public class NotificationUtils {
      */
     public static void removeImageFromDisc(Context context, String fileName) {
         if (context != null && !TextUtils.isEmpty(fileName)) {
-            context.deleteFile(fileName);
+            if (context.deleteFile(fileName)) {
+                Log.i(LOG_TAG, "Deleted file: " + fileName);
+            }
         }
     }
 

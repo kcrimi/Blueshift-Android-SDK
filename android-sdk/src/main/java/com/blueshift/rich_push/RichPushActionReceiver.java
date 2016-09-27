@@ -40,6 +40,12 @@ public class RichPushActionReceiver extends BroadcastReceiver {
             // remove cached images(if any) for this notification
             NotificationUtils.removeCachedCarouselImages(context, message);
 
+            /**
+             * Remove any cached images and meta data used for GIF notification
+             */
+            NotificationUtils.deleteCachedGifFrameBitmaps(context, message);
+            NotificationUtils.deleteCachedGifFramesMetaData(context, message);
+
             NotificationManager notificationManager =
                     (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
             notificationManager.cancel(intent.getIntExtra(RichPushConstants.EXTRA_NOTIFICATION_ID, 0));

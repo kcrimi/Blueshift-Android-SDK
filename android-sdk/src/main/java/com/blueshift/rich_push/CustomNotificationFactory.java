@@ -397,15 +397,15 @@ public class CustomNotificationFactory {
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
 
-                GifFrameData[] gifFrameData = NotificationUtils.getCachedFrameData(context, message);
+                GifFrameMetaData[] gifFrameMetaData = NotificationUtils.getCachedGifFramesMetaData(context, message);
 
-                if (gifFrameData == null) {
+                if (gifFrameMetaData == null) {
                     NotificationUtils.downloadAndCacheGifFrames(context, message);
-                    gifFrameData = NotificationUtils.getCachedFrameData(context, message);
+                    gifFrameMetaData = NotificationUtils.getCachedGifFramesMetaData(context, message);
                 }
 
-                if (gifFrameData != null && gifFrameData.length > frameIndex) {
-                    Bitmap bitmap = NotificationUtils.getCachedGifFrame(context, gifFrameData[frameIndex]);
+                if (gifFrameMetaData != null && gifFrameMetaData.length > frameIndex) {
+                    Bitmap bitmap = NotificationUtils.getCachedGifFrameBitmap(context, gifFrameMetaData[frameIndex]);
 
                     notification.bigContentView = createGIFNotification(context, message, bitmap);
                 }

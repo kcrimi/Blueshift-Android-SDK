@@ -3,8 +3,6 @@ package com.blueshift.rich_push;
 import android.app.IntentService;
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.Bitmap;
-import android.os.AsyncTask;
 
 import com.blueshift.util.NotificationUtils;
 
@@ -54,6 +52,12 @@ public class NotificationWorker extends IntentService {
                  */
                 NotificationUtils.removeCachedCarouselImages(this, message);
 
+                /**
+                 * Remove cached images and meta data used for GIF notification
+                 */
+                NotificationUtils.deleteCachedGifFrameBitmaps(this, message);
+                NotificationUtils.deleteCachedGifFramesMetaData(this, message);
+
                 break;
 
             case ACTION_PLAY_GIF:
@@ -69,10 +73,10 @@ public class NotificationWorker extends IntentService {
     }
 
     private void playGifNotification(Context context, Message message) {
-        GifFrameData[] gifFrameData = NotificationUtils.getCachedFrameData(context, message);
+        GifFrameMetaData[] gifFrameMetaData = NotificationUtils.getCachedGifFramesMetaData(context, message);
         int frameIndex = 0;
 
-        for (GifFrameData frameData : gifFrameData) {
+        for (GifFrameMetaData frameData : gifFrameMetaData) {
             CustomNotificationFactory
                     .getInstance()
                     .createAndShowGIFNotification(context, message, true, frameIndex++);
