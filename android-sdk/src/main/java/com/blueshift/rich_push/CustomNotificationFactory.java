@@ -400,13 +400,8 @@ public class CustomNotificationFactory {
      * @param frameIndex index of current GIF frame. Pass -1 to enable the play button
      */
     public void createAndShowGIFNotification(Context context, Message message, boolean isUpdating, int frameIndex) {
-        NotificationCompat.Builder builder = createBasicNotification(context, message);
+        NotificationCompat.Builder builder = createBasicNotification(context, message, isUpdating);
         if (builder != null) {
-
-            if (isUpdating) {
-                builder.setDefaults(0);
-            }
-
             Notification notification = builder.build();
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
