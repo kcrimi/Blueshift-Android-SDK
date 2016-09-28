@@ -3,6 +3,7 @@ package com.blueshift.rich_push;
 import android.app.IntentService;
 import android.content.Context;
 import android.content.Intent;
+import android.util.Log;
 
 import com.blueshift.util.NotificationUtils;
 
@@ -16,6 +17,8 @@ public class NotificationWorker extends IntentService {
     public static final String ACTION_CAROUSEL_IMG_CHANGE = "carousel_image_change";
     public static final String ACTION_NOTIFICATION_DELETE = "notification_delete";
     public static final String ACTION_PLAY_GIF = "play_gif";
+
+    private static final String LOG_TAG = "NotificationWorker";
 
     /**
      * Creates an IntentService.  Invoked by your subclass's constructor.
@@ -72,20 +75,39 @@ public class NotificationWorker extends IntentService {
                 .createAndShowCarousel(context, message, true, newIndex);
     }
 
+    /**
+     * This method is responsible for GIF playback.
+     *
+     * @param context valid {@link Context} object
+     * @param message valid {@link Message} object
+     */
     private void playGifNotification(Context context, Message message) {
         GifFrameMetaData[] gifFrameMetaData = NotificationUtils.getCachedGifFramesMetaData(context, message);
-        int frameIndex = 0;
 
-        for (GifFrameMetaData frameData : gifFrameMetaData) {
-            CustomNotificationFactory
-                    .getInstance()
-                    .createAndShowGIFNotification(context, message, true, frameIndex++);
+        // repeat count hard coded as 2 times for now.
+        // since showing GIF notification is a little expensive,
+        // lets keep it 2 for better experience and less resource usage.
+        for (int i = 0; i < 2; i++) {
+            int frameIndex = 0;
 
-            try {
-                Thread.sleep(frameData.getDelay());
-            } catch (InterruptedException e) {
-                e.printStackTrace();
+            for (GifFrameMetaData frameData : gifFrameMetaData) {
+                // show current frame in Notification
+                CustomNotificationFactory
+                        .getInstance()
+                        .createAndShowGIFNotification(context, message, true, frameIndex++);
+
+                // simulate frame delay
+                try {
+                    Thread.sleep(frameData.getDelay());
+                } catch (InterruptedException e) {
+                    Log.e(LOG_TAG, e.getMessage());
+                }
             }
         }
+
+        // Show notification with 0th frame and play button
+        CustomNotificationFactory
+                .getInstance()
+                .createAndShowGIFNotification(context, message, true, -1);
     }
 }

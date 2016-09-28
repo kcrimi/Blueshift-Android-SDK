@@ -381,10 +381,24 @@ public class CustomNotificationFactory {
         return PendingIntent.getService(context, 0, delIntent, PendingIntent.FLAG_ONE_SHOT);
     }
 
+    /**
+     * Method to create the GIF notification
+     *
+     * @param context valid context object
+     * @param message valid message object with gif image URL
+     */
     public void createAndShowGIFNotification(Context context, Message message) {
-        createAndShowGIFNotification(context, message, false, 0);
+        createAndShowGIFNotification(context, message, false, -1);
     }
 
+    /**
+     * Method to create/update the GIF notification.
+     *
+     * @param context    valid context object
+     * @param message    valid message object with gif image URL
+     * @param isUpdating flag indicating if notification is being updated or created
+     * @param frameIndex index of current GIF frame. Pass -1 to enable the play button
+     */
     public void createAndShowGIFNotification(Context context, Message message, boolean isUpdating, int frameIndex) {
         NotificationCompat.Builder builder = createBasicNotification(context, message);
         if (builder != null) {
@@ -405,9 +419,19 @@ public class CustomNotificationFactory {
                 }
 
                 if (gifFrameMetaData != null && gifFrameMetaData.length > frameIndex) {
+                    boolean showPlayButton = false;
+
+                    // frameIndex with value -1 says that we should enable the play button
+                    // also to treat it as frameIndex = 0
+                    if (frameIndex < 0) {
+                        showPlayButton = true;
+
+                        frameIndex = 0;
+                    }
+
                     Bitmap bitmap = NotificationUtils.getCachedGifFrameBitmap(context, gifFrameMetaData[frameIndex]);
 
-                    notification.bigContentView = createGIFNotification(context, message, bitmap);
+                    notification.bigContentView = createGIFNotificationContentView(context, message, bitmap, showPlayButton);
                 }
             }
 
@@ -418,7 +442,16 @@ public class CustomNotificationFactory {
         }
     }
 
-    private RemoteViews createGIFNotification(Context context, Message message, Bitmap bitmap) {
+    /**
+     * Creates bugContentView with current gif frame (passed in as bitmap) and enables/disables play button
+     *
+     * @param context        valid context object
+     * @param message        valid message object
+     * @param bitmap         current GIF frame
+     * @param showPlayButton flag indicates if we need to show play button in notification
+     * @return {@link RemoteViews} object with bigContentView
+     */
+    private RemoteViews createGIFNotificationContentView(Context context, Message message, Bitmap bitmap, boolean showPlayButton) {
         RemoteViews bigContentView = new RemoteViews(context.getPackageName(), R.layout.gif_notification_layout);
 
         // fill in basic notification details like title, body etc
@@ -427,21 +460,34 @@ public class CustomNotificationFactory {
         if (bitmap != null) {
             bigContentView.setImageViewBitmap(R.id.gif_big_picture, bitmap);
 
-            bigContentView.setOnClickPendingIntent(
-                    R.id.gif_play_button,
-                    getGifPlaybackPendingIntent(context, message)
-            );
+            int visibility = showPlayButton ? View.VISIBLE : View.INVISIBLE;
+            bigContentView.setViewVisibility(R.id.gif_play_button, visibility);
+
+            // attach click listener to play button only when it is visible
+            if (visibility == View.VISIBLE) {
+                bigContentView.setOnClickPendingIntent(
+                        R.id.gif_play_button,
+                        getGifPlaybackPendingIntent(context, message)
+                );
+            }
         }
 
         return bigContentView;
     }
 
+    /**
+     * Method to get {@link PendingIntent} for onclick event of play button
+     *
+     * @param context valid context object
+     * @param message valid message object
+     * @return {@link PendingIntent} to play GIF
+     */
     private PendingIntent getGifPlaybackPendingIntent(Context context, Message message) {
         Intent intent = new Intent(context, NotificationWorker.class);
         intent.setAction(NotificationWorker.ACTION_PLAY_GIF);
 
         intent.putExtra(RichPushConstants.EXTRA_MESSAGE, message);
 
-        return PendingIntent.getService(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+        return PendingIntent.getService(context, 0, intent, PendingIntent.FLAG_ONE_SHOT);
     }
 }
