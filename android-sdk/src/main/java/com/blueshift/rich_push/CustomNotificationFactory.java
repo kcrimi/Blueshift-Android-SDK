@@ -450,7 +450,7 @@ public class CustomNotificationFactory {
         RemoteViews bigContentView = new RemoteViews(context.getPackageName(), R.layout.gif_notification_layout);
 
         // fill in basic notification details like title, body etc
-        setBasicNotificationData(context, message, bigContentView);
+        setBasicNotificationData(context, message, bigContentView, true);
 
         if (bitmap != null) {
             bigContentView.setImageViewBitmap(R.id.gif_big_picture, bitmap);

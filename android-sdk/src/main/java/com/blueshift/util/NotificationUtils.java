@@ -51,7 +51,7 @@ public class NotificationUtils {
      */
     public static void downloadAndCacheGifFrames(Context context, Message message) {
         if (context != null && message != null) {
-            String imageUrl = message.getImage_url();
+            String imageUrl = message.getImageUrl();
             if (TextUtils.isEmpty(imageUrl)) {
                 Log.e(LOG_TAG, "No image url found. GIF download failed.");
             } else {
@@ -110,7 +110,7 @@ public class NotificationUtils {
 
     private static void cacheGifFramesMetaData(Context context, Message message, ArrayList<GifFrameMetaData> gifFrameMetaDataList) {
         if (message != null) {
-            String gifFileName = getImageFileName(message.getImage_url());
+            String gifFileName = getImageFileName(message.getImageUrl());
             if (context != null && !TextUtils.isEmpty(gifFileName)) {
                 context.getSharedPreferences(PREF_FILE(context), Context.MODE_PRIVATE)
                         .edit()
@@ -122,7 +122,7 @@ public class NotificationUtils {
 
     public static void deleteCachedGifFramesMetaData(Context context, Message message) {
         if (message != null) {
-            String fileName = getImageFileName(message.getImage_url());
+            String fileName = getImageFileName(message.getImageUrl());
             if (context != null && !TextUtils.isEmpty(fileName)) {
                 context.getSharedPreferences(PREF_FILE(context), Context.MODE_PRIVATE)
                         .edit()
@@ -136,7 +136,7 @@ public class NotificationUtils {
         GifFrameMetaData[] gifFrameMetaDataArray = null;
 
         if (message != null) {
-            String fileName = getImageFileName(message.getImage_url());
+            String fileName = getImageFileName(message.getImageUrl());
             if (context != null && !TextUtils.isEmpty(fileName)) {
                 String json = context.getSharedPreferences(PREF_FILE(context), Context.MODE_PRIVATE)
                         .getString(PREF_KEY(context, fileName), null);

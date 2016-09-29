@@ -17,6 +17,7 @@
             android:id="@+id/gif_big_picture"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
+            android:scaleType="centerCrop"
             android:contentDescription="@string/gif_notification_image" />
 
         <ImageButton
