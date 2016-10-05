@@ -9,16 +9,19 @@ import com.blueshift.util.NotificationUtils;
 
 /**
  * @author Rahul Raveendran V P
- *         Created on 20/9/16 @ 12:00 PM @ 3:04 PM
+ *         Created on 20/9/16 @ 12:00 PM @ 11:40 AM
  *         https://github.com/rahulrvp
  */
 public class NotificationWorker extends IntentService {
 
     public static final String ACTION_CAROUSEL_IMG_CHANGE = "carousel_image_change";
-    public static final String ACTION_NOTIFICATION_DELETE = "notification_delete";
-    public static final String ACTION_PLAY_GIF = "play_gif";
+    public static final String ACTION_START_GIF_PLAYBACK = "start_gif_playback";
+    public static final String ACTION_DELETE_GIF_NOTIFICATION = "delete_gif_notification";
+    public static final String ACTION_DELETE_CAROUSEL_NOTIFICATION = "delete_carousel_notification";
 
     private static final String LOG_TAG = "NotificationWorker";
+
+    private static boolean mShouldPlayGif = false;
 
     /**
      * Creates an IntentService.  Invoked by your subclass's constructor.
@@ -31,6 +34,18 @@ public class NotificationWorker extends IntentService {
 
     public NotificationWorker() {
         super("NotificationIntentService");
+    }
+
+    public synchronized static void enableGifPlayback() {
+        mShouldPlayGif = true;
+    }
+
+    public synchronized static void disableGifPlayback() {
+        mShouldPlayGif = false;
+    }
+
+    private synchronized static boolean shouldPlayGif() {
+        return mShouldPlayGif;
     }
 
     @Override
@@ -49,22 +64,30 @@ public class NotificationWorker extends IntentService {
 
                 break;
 
-            case ACTION_NOTIFICATION_DELETE:
+            case ACTION_DELETE_CAROUSEL_NOTIFICATION:
                 /**
                  * Remove if there is any cached images (used for carousel) found for this notification.
                  */
                 NotificationUtils.removeCachedCarouselImages(this, message);
 
+                Log.i(LOG_TAG, "Carousel notification deleted. Id: " + message.getCategory().getNotificationId());
+
+                break;
+
+            case ACTION_START_GIF_PLAYBACK:
+                playGifNotification(getApplicationContext(), message);
+
+                break;
+
+            case ACTION_DELETE_GIF_NOTIFICATION:
                 /**
                  * Remove cached images and meta data used for GIF notification
                  */
                 NotificationUtils.deleteCachedGifFrameBitmaps(this, message);
                 NotificationUtils.deleteCachedGifFramesMetaData(this, message);
 
-                break;
+                Log.i(LOG_TAG, "GIF notification deleted. Id: " + message.getCategory().getNotificationId());
 
-            case ACTION_PLAY_GIF:
-                playGifNotification(getApplicationContext(), message);
                 break;
         }
     }
@@ -82,7 +105,14 @@ public class NotificationWorker extends IntentService {
      * @param message valid {@link Message} object
      */
     private void playGifNotification(Context context, Message message) {
+        enableGifPlayback();
+
         GifFrameMetaData[] gifFrameMetaData = NotificationUtils.getCachedGifFramesMetaData(context, message);
+
+        // exit if there is not cached info available.
+        if (gifFrameMetaData == null || gifFrameMetaData.length == 0) {
+            return;
+        }
 
         // repeat count hard coded as 2 times for now.
         // since showing GIF notification is a little expensive,
@@ -91,23 +121,31 @@ public class NotificationWorker extends IntentService {
             int frameIndex = 0;
 
             for (GifFrameMetaData frameData : gifFrameMetaData) {
-                // show current frame in Notification
-                CustomNotificationFactory
-                        .getInstance()
-                        .createAndShowGIFNotification(context, message, true, frameIndex++);
+                if (shouldPlayGif()) {
+                    // show current frame in Notification
+                    CustomNotificationFactory
+                            .getInstance()
+                            .createAndShowGIFNotification(context, message, true, frameIndex++);
 
-                // simulate frame delay
-                try {
-                    Thread.sleep(frameData.getDelay());
-                } catch (InterruptedException e) {
-                    Log.e(LOG_TAG, e.getMessage());
+                    // simulate frame delay
+                    try {
+                        Thread.sleep(frameData.getDelay());
+                    } catch (InterruptedException e) {
+                        Log.e(LOG_TAG, e.getMessage());
+                    }
+                } else {
+                    // falls in this block when user clears notification
+                    // or when notification is clicked and then cancelled.
+                    break;
                 }
             }
         }
 
-        // Show notification with 0th frame and play button
-        CustomNotificationFactory
-                .getInstance()
-                .createAndShowGIFNotification(context, message, true, -1);
+        if (shouldPlayGif()) {
+            // Show notification with 0th frame and play button
+            CustomNotificationFactory
+                    .getInstance()
+                    .createAndShowGIFNotification(context, message, true, -1);
+        }
     }
 }

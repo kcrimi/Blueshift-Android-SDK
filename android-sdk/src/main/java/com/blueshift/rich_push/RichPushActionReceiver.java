@@ -13,14 +13,16 @@ import com.blueshift.util.NotificationUtils;
 
 /**
  * @author Rahul Raveendran V P
- *         Created on 25/2/15 @ 3:07 PM
+ *         Created on 25/2/15 @ 11:40 AM
  *         https://github.com/rahulrvp
  */
 public class RichPushActionReceiver extends BroadcastReceiver {
 
+    private static final String LOG_TAG = "RichPushActionReceiver";
+
     @Override
     public void onReceive(Context context, Intent intent) {
-        Log.d("RichPushActionReceiver", "onReceive - " + intent.getAction());
+        Log.d(LOG_TAG, "onReceive - " + intent.getAction());
 
         String action = intent.getAction();
         Message message = (Message) intent.getSerializableExtra(RichPushConstants.EXTRA_MESSAGE);
@@ -37,14 +39,34 @@ public class RichPushActionReceiver extends BroadcastReceiver {
                 openApp(context, message);
             }
 
-            // remove cached images(if any) for this notification
-            NotificationUtils.removeCachedCarouselImages(context, message);
+            if (NotificationType.CustomNotification.equals(message.getNotificationType())) {
+                // delete cached files based on category
+                switch (message.getCategory()) {
+                    case Carousel:
+                    case AnimatedCarousel:
+                        // remove cached images(if any) for this carousel notification
+                        NotificationUtils.removeCachedCarouselImages(context, message);
 
-            /**
-             * Remove any cached images and meta data used for GIF notification
-             */
-            NotificationUtils.deleteCachedGifFrameBitmaps(context, message);
-            NotificationUtils.deleteCachedGifFramesMetaData(context, message);
+                        break;
+
+                    case GifNotification:
+                        /**
+                         * Stop if any Gif is being played
+                         */
+                        NotificationWorker.disableGifPlayback();
+
+                        /**
+                         * Remove any cached images and meta data used for GIF notification
+                         */
+                        NotificationUtils.deleteCachedGifFrameBitmaps(context, message);
+                        NotificationUtils.deleteCachedGifFramesMetaData(context, message);
+
+                        break;
+
+                    default:
+                        Log.d(LOG_TAG, "Unknown custom notification category.");
+                }
+            }
 
             NotificationManager notificationManager =
                     (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
@@ -113,7 +135,7 @@ public class RichPushActionReceiver extends BroadcastReceiver {
     public void openApp(Context context, Message message) {
         if (context != null) {
             PackageManager packageManager = context.getPackageManager();
-            Intent launcherIntent  = packageManager.getLaunchIntentForPackage(context.getPackageName());
+            Intent launcherIntent = packageManager.getLaunchIntentForPackage(context.getPackageName());
             launcherIntent.putExtra(RichPushConstants.EXTRA_MESSAGE, message);
             launcherIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             context.startActivity(launcherIntent);

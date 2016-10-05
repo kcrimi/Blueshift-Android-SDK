@@ -65,7 +65,10 @@ public class CustomNotificationFactory {
                     notification.bigContentView = createAnimatedCarousal(context, message);
                 }
 
-                builder.setDeleteIntent(getNotificationDeleteIntent(context, message));
+                notification.deleteIntent =
+                        getNotificationDeleteIntent(
+                                NotificationWorker.ACTION_DELETE_CAROUSEL_NOTIFICATION,
+                                context, message);
 
                 NotificationManager manager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
                 manager.notify(message.getCategory().getNotificationId(), notification);
@@ -102,7 +105,10 @@ public class CustomNotificationFactory {
                     notification.bigContentView = getCarouselImage(context, message, isUpdating, targetIndex);
                 }
 
-                builder.setDeleteIntent(getNotificationDeleteIntent(context, message));
+                notification.deleteIntent =
+                        getNotificationDeleteIntent(
+                                NotificationWorker.ACTION_DELETE_CAROUSEL_NOTIFICATION,
+                                context, message);
 
                 NotificationManager manager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
                 manager.notify(message.getCategory().getNotificationId(), notification);
@@ -368,13 +374,14 @@ public class CustomNotificationFactory {
     /**
      * This method generated the pending intent to be called when notification is deleted.
      *
+     * @param action  action to be taken on delete intent call
      * @param context valid context object
      * @param message valid message object
      * @return {@link PendingIntent}
      */
-    private PendingIntent getNotificationDeleteIntent(Context context, Message message) {
+    private PendingIntent getNotificationDeleteIntent(String action, Context context, Message message) {
         Intent delIntent = new Intent(context, NotificationWorker.class);
-        delIntent.setAction(NotificationWorker.ACTION_NOTIFICATION_DELETE);
+        delIntent.setAction(action);
 
         delIntent.putExtra(RichPushConstants.EXTRA_MESSAGE, message);
 
@@ -430,7 +437,10 @@ public class CustomNotificationFactory {
                 }
             }
 
-            builder.setDeleteIntent(getNotificationDeleteIntent(context, message));
+            notification.deleteIntent =
+                    getNotificationDeleteIntent(
+                            NotificationWorker.ACTION_DELETE_GIF_NOTIFICATION,
+                            context, message);
 
             NotificationManager manager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
             manager.notify(message.getCategory().getNotificationId(), notification);
@@ -479,7 +489,7 @@ public class CustomNotificationFactory {
      */
     private PendingIntent getGifPlaybackPendingIntent(Context context, Message message) {
         Intent intent = new Intent(context, NotificationWorker.class);
-        intent.setAction(NotificationWorker.ACTION_PLAY_GIF);
+        intent.setAction(NotificationWorker.ACTION_START_GIF_PLAYBACK);
 
         intent.putExtra(RichPushConstants.EXTRA_MESSAGE, message);
 
