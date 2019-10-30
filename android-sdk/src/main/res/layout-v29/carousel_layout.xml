@@ -4,9 +4,9 @@
     android:layout_height="match_parent">
 
     <include
-        layout="@layout/notification_basic_layout"
+        layout="@layout/notification_basic_layout_v2"
         android:layout_width="match_parent"
-        android:layout_height="@dimen/bs_notification_min_height" />
+        android:layout_height="wrap_content" />
 
     <RelativeLayout
         android:layout_width="match_parent"

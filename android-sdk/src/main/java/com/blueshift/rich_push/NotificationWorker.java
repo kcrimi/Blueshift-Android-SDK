@@ -63,7 +63,7 @@ public class NotificationWorker extends IntentService {
     }
 
     private void updateCarouselNotification(Context context, Message message, int newIndex, int notificationId) {
-        CustomNotificationFactory
+        CustomNotificationFactoryV2
                 .getInstance()
                 .createAndShowCarousel(context, message, true, newIndex, notificationId);
     }

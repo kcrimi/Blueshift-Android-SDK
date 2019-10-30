@@ -271,7 +271,7 @@ public class NotificationFactory {
 
     private static void buildAndShowCustomNotifications(Context context, Message message) {
         if (context != null && message != null) {
-            CustomNotificationFactory notificationFactory = CustomNotificationFactory.getInstance();
+            CustomNotificationFactoryV2 notificationFactory = CustomNotificationFactoryV2.getInstance();
 
             switch (message.getCategory()) {
                 case AnimatedCarousel:
