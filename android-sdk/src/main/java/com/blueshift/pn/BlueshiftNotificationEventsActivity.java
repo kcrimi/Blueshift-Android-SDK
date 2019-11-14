@@ -66,6 +66,19 @@ public class BlueshiftNotificationEventsActivity extends AppCompatActivity {
                         intent = NotificationUtils.getOpenAppIntent(this, message);
                     }
 
+                    if (intent == null) {
+                        // we could not find an intent based on the category mentioned.
+                        // using the default one.
+                        intent = NotificationUtils.getOpenAppIntent(this, message);
+                    }
+
+                    if (intent == null) {
+                        // we could not create any intent to open the app. so skipping the intent
+                        // launch to void crash.
+                        // note: this almost never happens!
+                        return;
+                    }
+
                     // add complete bundle to the intent.
                     intent.putExtras(extraBundle);
 
