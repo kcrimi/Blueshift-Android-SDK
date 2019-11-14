@@ -580,45 +580,24 @@ public class Blueshift {
         }
 
         // running on a non-UI thread to avoid possible ANR.
-        new SendEventTask(eventName, eventParams, canBatchThisEvent).execute(mContext);
+        sendEventInBackground(eventName, eventParams, canBatchThisEvent);
     }
 
-    private static class SendEventTask extends AsyncTask<Context, Void, Boolean> {
-
-        private String mEventName;
-        private HashMap<String, Object> mParams;
-        private boolean mCanBatch;
-
-        SendEventTask(String eventName, HashMap<String, Object> eventParams, boolean canBatch) {
-            mEventName = eventName;
-            mParams = eventParams;
-            mCanBatch = canBatch;
-        }
-
-        @Override
-        protected Boolean doInBackground(Context... contexts) {
-            boolean isSuccess = false;
-
-            Context context = contexts != null && contexts.length > 0 ? contexts[0] : null;
-            if (context != null) {
-                Blueshift blueshift = Blueshift.getInstance(context);
-                try {
-                    // call send event and return its result.
-                    isSuccess = blueshift.sendEvent(mParams, mCanBatch);
-                } catch (Exception e) {
-                    String errMsg = e.getMessage() != null ? e.getMessage() : "";
-                    Log.e(LOG_TAG, "sendEvent() failed.\n" + errMsg);
+    private void sendEventInBackground(final String eventName, final HashMap<String, Object> eventParams, final boolean addToBatch) {
+        BlueshiftExecutor.getInstance().runOnNetworkThread(
+                new Runnable() {
+                    @Override
+                    public void run() {
+                        try {
+                            boolean isSuccess = sendEvent(eventParams, addToBatch);
+                            BlueshiftLogger.d(LOG_TAG, "Event: " + eventName + ", Tracking status: " + (isSuccess ? "success" : "failed"));
+                        } catch (Exception e) {
+                            BlueshiftLogger.e(LOG_TAG, "sendEventInBackground() failed!");
+                            BlueshiftLogger.e(LOG_TAG, e);
+                        }
+                    }
                 }
-            }
-
-            return isSuccess;
-        }
-
-        @Override
-        protected void onPostExecute(Boolean isSuccess) {
-            Log.d(LOG_TAG, "Event: " + mEventName + "," +
-                    " Tracking status: " + (isSuccess ? "success" : "failed"));
-        }
+        );
     }
 
     /**
