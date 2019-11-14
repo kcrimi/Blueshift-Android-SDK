@@ -62,9 +62,14 @@ public class Blueshift {
     private static final HashMap<String, Object> sDeviceParams = new HashMap<>();
     private static final HashMap<String, Object> sAppParams = new HashMap<>();
 
+    // this context & static instance is saved for the lifetime of the process
+    // will be cleaned up once the process is killed by closing the app
+    @SuppressLint("StaticFieldLeak")
     private static Context mContext;
-    private static Configuration mConfiguration;
+    @SuppressLint("StaticFieldLeak")
     private static Blueshift instance = null;
+
+    private static Configuration mConfiguration;
 
     private Blueshift() {
         // private constructor for singleton behavior
@@ -77,7 +82,9 @@ public class Blueshift {
      * @return instance of Blueshift
      */
     public synchronized static Blueshift getInstance(Context context) {
-        mContext = context;
+        if (mContext == null) {
+            mContext = context.getApplicationContext();
+        }
 
         if (instance == null) {
             instance = new Blueshift();
