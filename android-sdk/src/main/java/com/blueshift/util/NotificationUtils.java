@@ -2,6 +2,7 @@ package com.blueshift.util;
 
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -12,10 +13,12 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Build;
 import android.os.Bundle;
-import androidx.annotation.NonNull;
 import android.text.TextUtils;
 import android.util.DisplayMetrics;
 import android.util.Log;
+
+import androidx.annotation.NonNull;
+import androidx.core.app.TaskStackBuilder;
 
 import com.blueshift.Blueshift;
 import com.blueshift.BlueshiftLogger;
@@ -32,6 +35,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.List;
+import java.util.Random;
 
 /**
  * A class with helper methods to show custom notification.
@@ -41,6 +45,16 @@ import java.util.List;
 public class NotificationUtils {
 
     private static final String LOG_TAG = "NotificationUtils";
+
+    private final static Random sRandom = new Random();
+
+    public static int getPendingIntentRequestCode() {
+        return sRandom.nextInt(Integer.MAX_VALUE);
+    }
+
+    public static int getNotificationId() {
+        return sRandom.nextInt(Integer.MAX_VALUE);
+    }
 
     /**
      * Extracts the file name from the image file url
@@ -518,4 +532,60 @@ public class NotificationUtils {
 
         return launcherIntent;
     }
+
+    // [BEGIN] PendingIntent builder methods.
+
+    public static PendingIntent getBuyActionPendingIntent(Context context, Message message, int notificationId) {
+        String action = RichPushConstants.ACTION_BUY(context);
+        return getNotificationClickPendingIntent(action, context, message, notificationId);
+    }
+
+    public static PendingIntent getViewActionPendingIntent(Context context, Message message, int notificationId) {
+        String action = RichPushConstants.ACTION_VIEW(context);
+        return getNotificationClickPendingIntent(action, context, message, notificationId);
+    }
+
+    public static PendingIntent getOpenCartPendingIntent(Context context, Message message, int notificationId) {
+        String action = RichPushConstants.ACTION_OPEN_CART(context);
+        return getNotificationClickPendingIntent(action, context, message, notificationId);
+    }
+
+    public static PendingIntent getOpenAppPendingIntent(Context context, Message message, int notificationId) {
+        String action = RichPushConstants.ACTION_OPEN_APP(context);
+        return getNotificationClickPendingIntent(action, context, message, notificationId);
+    }
+
+    public static PendingIntent getOpenPromotionPendingIntent(Context context, Message message, int notificationId) {
+        String action = RichPushConstants.ACTION_OPEN_OFFER_PAGE(context);
+        return getNotificationClickPendingIntent(action, context, message, notificationId);
+    }
+
+    public static PendingIntent getNotificationClickPendingIntent(String action, Context context, Message message, int notificationId) {
+        // if deep link url is available, despite the fact that we have a category based action,
+        // we will use the open app action to launch app and pass the deep link url to it.
+        if (TextUtils.isEmpty(action) || (message != null && message.isDeepLinkingEnabled())) {
+            action = RichPushConstants.ACTION_OPEN_APP(context);
+        }
+
+        // set extra params
+        Bundle bundle = new Bundle();
+        bundle.putInt(RichPushConstants.EXTRA_NOTIFICATION_ID, notificationId);
+
+        if (message != null) {
+            bundle.putSerializable(RichPushConstants.EXTRA_MESSAGE, message);
+
+            if (message.isDeepLinkingEnabled()) {
+                bundle.putString(RichPushConstants.EXTRA_DEEP_LINK_URL, message.getDeepLinkUrl());
+            }
+        }
+
+        // get the activity to handle clicks (user defined or sdk defined
+        Intent intent = NotificationUtils.getNotificationEventsActivity(context, action, bundle);
+        TaskStackBuilder taskStackBuilder = TaskStackBuilder.create(context);
+        taskStackBuilder.addNextIntent(intent);
+
+        return taskStackBuilder.getPendingIntent(getPendingIntentRequestCode(), PendingIntent.FLAG_ONE_SHOT);
+    }
+
+    // [END] PendingIntent builder methods.
 }

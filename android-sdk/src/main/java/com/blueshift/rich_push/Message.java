@@ -380,4 +380,22 @@ public class Message implements Serializable {
     public String getNotificationChannelDescription() {
         return notification_channel_description;
     }
+
+    public boolean isNative() {
+        return getNotificationType() == NotificationType.Notification;
+    }
+
+    public boolean isCarousel() {
+        return getNotificationType() == NotificationType.CustomNotification &&
+                getCategory() == NotificationCategory.Carousel;
+    }
+
+    public boolean isAnimatedCarousel() {
+        return getNotificationType() == NotificationType.CustomNotification &&
+                getCategory() == NotificationCategory.AnimatedCarousel;
+    }
+
+    public boolean hasImage() {
+        return !TextUtils.isEmpty(image_url);
+    }
 }
