@@ -17,7 +17,7 @@ import java.io.IOException;
 import java.net.URL;
 
 class BlueshiftNotificationNative extends BlueshiftNotification {
-    private static final String TAG = "BlueshiftNotificationNative";
+    private static final String TAG = "NotificationNative";
 
     private int id = NotificationUtils.getNotificationId();
 

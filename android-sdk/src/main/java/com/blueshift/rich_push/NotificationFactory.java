@@ -279,7 +279,8 @@ public class NotificationFactory {
 
             switch (message.getCategory()) {
                 case AnimatedCarousel:
-                    notificationFactory.createAndShowAnimatedCarousel(context, message);
+                    // notificationFactory.createAndShowAnimatedCarousel(context, message);
+                    BlueshiftNotificationManager.getInstance().showNotification(context, message);
                     break;
 
                 case Carousel:

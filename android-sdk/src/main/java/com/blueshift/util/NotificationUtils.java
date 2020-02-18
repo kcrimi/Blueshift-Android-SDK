@@ -26,6 +26,7 @@ import com.blueshift.model.Configuration;
 import com.blueshift.pn.BlueshiftNotificationEventsActivity;
 import com.blueshift.rich_push.CarouselElement;
 import com.blueshift.rich_push.Message;
+import com.blueshift.rich_push.NotificationWorker;
 import com.blueshift.rich_push.RichPushConstants;
 
 import java.io.File;
@@ -588,4 +589,53 @@ public class NotificationUtils {
     }
 
     // [END] PendingIntent builder methods.
+
+    /**
+     * Creates pending intent to attach with click actions on carousel images. Each image shown
+     * in the carousel will have a separate click action. Default action will be app open.
+     *
+     * @param context        valid context object
+     * @param message        valid message object
+     * @param element        corresponding carousel element
+     * @param notificationId id of the notification being clicked
+     * @return {@link PendingIntent}
+     */
+    public static PendingIntent getCarouselImageClickPendingIntent(Context context, Message message, CarouselElement element, int notificationId) {
+        String action = RichPushConstants.ACTION_OPEN_APP(context); // default is OPEN_APP
+
+        Bundle bundle = new Bundle();
+        bundle.putInt(RichPushConstants.EXTRA_NOTIFICATION_ID, notificationId);
+        bundle.putSerializable(RichPushConstants.EXTRA_MESSAGE, message);
+        bundle.putSerializable(RichPushConstants.EXTRA_CAROUSEL_ELEMENT, element);
+
+        // TODO: 2020-02-18 Use deep link instead of putting extras
+        if (element.isDeepLinkingEnabled()) {
+            bundle.putString(RichPushConstants.EXTRA_DEEP_LINK_URL, element.getDeepLinkUrl());
+        } else {
+            action = RichPushConstants.buildAction(context, element.getAction());
+        }
+
+        // get the activity to handle clicks (user defined or sdk defined
+        Intent intent = NotificationUtils.getNotificationEventsActivity(context, action, bundle);
+        TaskStackBuilder taskStackBuilder = TaskStackBuilder.create(context);
+        taskStackBuilder.addNextIntent(intent);
+
+        return taskStackBuilder.getPendingIntent(getPendingIntentRequestCode(), PendingIntent.FLAG_ONE_SHOT);
+    }
+
+    /**
+     * This method generated the pending intent to be called when notification is deleted.
+     *
+     * @param context valid context object
+     * @param message valid message object
+     * @return {@link PendingIntent}
+     */
+    public static PendingIntent getNotificationDeleteIntent(Context context, Message message) {
+        Intent delIntent = new Intent(context, NotificationWorker.class);
+        delIntent.setAction(NotificationWorker.ACTION_NOTIFICATION_DELETE);
+
+        delIntent.putExtra(RichPushConstants.EXTRA_MESSAGE, message);
+
+        return PendingIntent.getService(context, getPendingIntentRequestCode(), delIntent, PendingIntent.FLAG_ONE_SHOT);
+    }
 }
