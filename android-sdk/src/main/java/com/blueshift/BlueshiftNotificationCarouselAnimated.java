@@ -50,7 +50,7 @@ class BlueshiftNotificationCarouselAnimated extends BlueshiftNotificationCarouse
 
     private RemoteViews getNotificationLayoutExpanded() {
         try {
-            RemoteViews root = new RemoteViews(getContext().getPackageName(), R.layout.carousel_big_content);
+            RemoteViews root = new RemoteViews(getContext().getPackageName(), R.layout.notification_big_content);
 
             Message message = getMessage();
             if (message != null) {

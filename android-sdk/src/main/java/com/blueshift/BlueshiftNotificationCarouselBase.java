@@ -21,7 +21,7 @@ abstract class BlueshiftNotificationCarouselBase extends BlueshiftNotification {
 
     RemoteViews getOverlayViewWithText(CarouselElement element) {
         if (element != null) {
-            RemoteViews container = new RemoteViews(getContext().getPackageName(), R.layout.carousel_big_content_overlay);
+            RemoteViews container = new RemoteViews(getContext().getPackageName(), R.layout.notification_big_content_overlay_with_text);
 
             CarouselElementText text = element.getContentText();
             CarouselElementText subtext = element.getContentSubtext();
