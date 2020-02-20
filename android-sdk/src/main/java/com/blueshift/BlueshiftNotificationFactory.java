@@ -11,7 +11,7 @@ class BlueshiftNotificationFactory {
         if (message.isNative()) {
             blueshiftNotification = BlueshiftNotificationNative.newInstance(context, message);
         } else if (message.isCarousel()) {
-            blueshiftNotification = new BlueshiftNotificationCarousel(context, message);
+            blueshiftNotification = new BlueshiftNotificationCarouselNonAnimated(context, message);
         } else if (message.isAnimatedCarousel()) {
             blueshiftNotification = new BlueshiftNotificationCarouselAnimated(context, message);
         }

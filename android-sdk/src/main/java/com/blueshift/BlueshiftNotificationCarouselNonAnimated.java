@@ -5,9 +5,9 @@ import android.content.Context;
 
 import com.blueshift.rich_push.Message;
 
-public class BlueshiftNotificationCarousel extends BlueshiftNotification {
+public class BlueshiftNotificationCarouselNonAnimated extends BlueshiftNotification {
 
-    BlueshiftNotificationCarousel(Context context, Message message) {
+    BlueshiftNotificationCarouselNonAnimated(Context context, Message message) {
         super(context, message);
     }
 
