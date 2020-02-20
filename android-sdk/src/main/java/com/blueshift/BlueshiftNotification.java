@@ -36,6 +36,7 @@ abstract class BlueshiftNotification {
             NotificationManagerCompat manager = NotificationManagerCompat.from(mContext);
             createChannel(manager);
             manager.notify(getNotificationId(), getNotification());
+            status = true;
         } catch (Exception e) {
             BlueshiftLogger.e(TAG, e);
         }
@@ -92,9 +93,9 @@ abstract class BlueshiftNotification {
 
     private void addBasicConfig(NotificationCompat.Builder builder) {
         if (builder != null) {
-            builder.setDefaults(Notification.DEFAULT_SOUND);
+            builder.setDefaults(Notification.DEFAULT_ALL);
             builder.setAutoCancel(true);
-            builder.setPriority(NotificationCompat.PRIORITY_MAX);
+            builder.setPriority(NotificationCompat.PRIORITY_DEFAULT);
         }
     }
 

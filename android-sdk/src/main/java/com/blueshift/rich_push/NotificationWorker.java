@@ -4,6 +4,7 @@ import android.app.IntentService;
 import android.content.Context;
 import android.content.Intent;
 
+import com.blueshift.BlueshiftNotificationManager;
 import com.blueshift.util.NotificationUtils;
 
 /**
@@ -63,8 +64,12 @@ public class NotificationWorker extends IntentService {
     }
 
     private void updateCarouselNotification(Context context, Message message, int newIndex, int notificationId) {
-        CustomNotificationFactory
-                .getInstance()
-                .createAndShowCarousel(context, message, true, newIndex, notificationId);
+        // TODO: 2020-02-20 @Rahul -> Fix this
+//        CustomNotificationFactory
+//                .getInstance()
+//                .createAndShowCarousel(context, message, true, newIndex, notificationId);
+
+        BlueshiftNotificationManager.getInstance().updateNonAnimatedCarousel(context, message, notificationId, newIndex);
+
     }
 }

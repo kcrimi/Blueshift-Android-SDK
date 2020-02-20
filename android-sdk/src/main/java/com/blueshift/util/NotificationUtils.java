@@ -26,6 +26,7 @@ import com.blueshift.model.Configuration;
 import com.blueshift.pn.BlueshiftNotificationEventsActivity;
 import com.blueshift.rich_push.CarouselElement;
 import com.blueshift.rich_push.Message;
+import com.blueshift.rich_push.NotificationFactory;
 import com.blueshift.rich_push.NotificationWorker;
 import com.blueshift.rich_push.RichPushConstants;
 
@@ -637,5 +638,27 @@ public class NotificationUtils {
         delIntent.putExtra(RichPushConstants.EXTRA_MESSAGE, message);
 
         return PendingIntent.getService(context, getPendingIntentRequestCode(), delIntent, PendingIntent.FLAG_ONE_SHOT);
+    }
+
+    /**
+     * Helper method to return pending intent required by the onClick
+     * action on Next/Previous button on Carousel Notification.
+     *
+     * @param context        valid context
+     * @param message        valid message
+     * @param targetIndex    the index of next image to be displayed in carousel
+     * @param notificationId id of the notification to be updated with next/prev image
+     * @return {@link PendingIntent}
+     */
+    public static PendingIntent getNavigationPendingIntent(Context context, Message message, int targetIndex, int notificationId) {
+        Intent intent = new Intent(context, NotificationWorker.class);
+        intent.setAction(NotificationWorker.ACTION_CAROUSEL_IMG_CHANGE);
+
+        intent.putExtra(RichPushConstants.EXTRA_CAROUSEL_INDEX, targetIndex);
+        intent.putExtra(RichPushConstants.EXTRA_MESSAGE, message);
+        intent.putExtra(RichPushConstants.EXTRA_NOTIFICATION_ID, notificationId);
+
+        return PendingIntent.getService(context,
+                NotificationFactory.getRandomPIRequestCode(), intent, PendingIntent.FLAG_UPDATE_CURRENT);
     }
 }

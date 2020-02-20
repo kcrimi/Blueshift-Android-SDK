@@ -11,11 +11,15 @@ class BlueshiftNotificationFactory {
         if (message.isNative()) {
             blueshiftNotification = BlueshiftNotificationNative.newInstance(context, message);
         } else if (message.isCarousel()) {
-            blueshiftNotification = new BlueshiftNotificationCarouselNonAnimated(context, message);
+            blueshiftNotification = BlueshiftNotificationCarouselNonAnimated.newInstance(context, message);
         } else if (message.isAnimatedCarousel()) {
             blueshiftNotification = new BlueshiftNotificationCarouselAnimated(context, message);
         }
 
         return blueshiftNotification;
+    }
+
+    static BlueshiftNotification getUpdatedNonAnimatedCarouselNotification(Context context, Message message, int id, int index) {
+        return BlueshiftNotificationCarouselNonAnimated.newInstance(context, message, id, true, index);
     }
 }

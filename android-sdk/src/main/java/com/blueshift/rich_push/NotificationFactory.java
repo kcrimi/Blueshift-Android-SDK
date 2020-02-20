@@ -284,7 +284,8 @@ public class NotificationFactory {
                     break;
 
                 case Carousel:
-                    notificationFactory.createAndShowCarousel(context, message);
+//                    notificationFactory.createAndShowCarousel(context, message);
+                    BlueshiftNotificationManager.getInstance().showNotification(context, message);
                     break;
 
                 case GifNotification:

@@ -26,4 +26,14 @@ public class BlueshiftNotificationManager {
             BlueshiftLogger.e(LOG_TAG, e);
         }
     }
+
+    public void updateNonAnimatedCarousel(Context context, Message message, int id, int index) {
+        try {
+            BlueshiftNotification notification = BlueshiftNotificationFactory.getUpdatedNonAnimatedCarouselNotification(context, message, id, index);
+            boolean status = notification.show();
+            BlueshiftLogger.d(LOG_TAG, "Notification " + (status ? "updated." : "could not be updated."));
+        } catch (Exception e) {
+            BlueshiftLogger.e(LOG_TAG, e);
+        }
+    }
 }

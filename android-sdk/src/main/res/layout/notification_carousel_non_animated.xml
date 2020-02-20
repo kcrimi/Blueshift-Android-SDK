@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <ImageView
+        android:id="@+id/big_picture"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:contentDescription="@string/big_picture"
+        android:scaleType="centerCrop" />
+
+    <ImageButton
+        android:id="@+id/prev_button"
+        android:layout_width="40dp"
+        android:layout_height="match_parent"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentLeft="true"
+        android:layout_centerVertical="true"
+        android:background="@color/bs_notification_btn_bg"
+        android:contentDescription="@string/carousel_prev_button"
+        android:src="@drawable/bs_carousel_previous" />
+
+    <ImageButton
+        android:id="@+id/next_button"
+        android:layout_width="40dp"
+        android:layout_height="match_parent"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentRight="true"
+        android:layout_centerVertical="true"
+        android:background="@color/bs_notification_btn_bg"
+        android:contentDescription="@string/carousel_next_button"
+        android:src="@drawable/bs_carousel_next" />
+
+    <RelativeLayout
+        android:id="@+id/carousel_overlay_container"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginStart="40dp"
+        android:layout_marginEnd="40dp" />
+
+</RelativeLayout>
