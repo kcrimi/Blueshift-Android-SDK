@@ -64,12 +64,6 @@ public class NotificationWorker extends IntentService {
     }
 
     private void updateCarouselNotification(Context context, Message message, int newIndex, int notificationId) {
-        // TODO: 2020-02-20 @Rahul -> Fix this
-//        CustomNotificationFactory
-//                .getInstance()
-//                .createAndShowCarousel(context, message, true, newIndex, notificationId);
-
         BlueshiftNotificationManager.getInstance().updateNonAnimatedCarousel(context, message, notificationId, newIndex);
-
     }
 }

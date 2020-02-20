@@ -40,7 +40,7 @@ import java.util.Locale;
  * <p>
  * Created by Rahul on 16/9/16.
  */
-class CustomNotificationFactory {
+public class CustomNotificationFactory {
 
     private static final String LOG_TAG = "NotificationFactory";
 
@@ -118,7 +118,7 @@ class CustomNotificationFactory {
      * @param isUpdating  flag to indicate id the notification should be created or updated
      * @param targetIndex index of the image to be shown in carousel - carousel element index
      */
-    void createAndShowCarousel(Context context, Message message, boolean isUpdating, int targetIndex, int notificationId) {
+    public void createAndShowCarousel(Context context, Message message, boolean isUpdating, int targetIndex, int notificationId) {
         if (context != null && message != null) {
             NotificationCompat.Builder builder = createBasicNotification(context, message, isUpdating, notificationId);
             if (builder != null) {

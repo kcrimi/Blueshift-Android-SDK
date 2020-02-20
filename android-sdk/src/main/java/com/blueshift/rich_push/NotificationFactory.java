@@ -20,7 +20,6 @@ import androidx.core.app.NotificationCompat;
 import androidx.core.app.TaskStackBuilder;
 
 import com.blueshift.Blueshift;
-import com.blueshift.BlueshiftNotificationManager;
 import com.blueshift.model.Configuration;
 import com.blueshift.util.NotificationUtils;
 import com.blueshift.util.SdkLog;
@@ -59,8 +58,7 @@ public class NotificationFactory {
                     break;
 
                 case Notification:
-                    BlueshiftNotificationManager.getInstance().showNotification(context, message);
-//                    buildAndShowNotification(context, message);
+                    buildAndShowNotification(context, message);
                     break;
 
                 case CustomNotification:
@@ -279,13 +277,11 @@ public class NotificationFactory {
 
             switch (message.getCategory()) {
                 case AnimatedCarousel:
-                    // notificationFactory.createAndShowAnimatedCarousel(context, message);
-                    BlueshiftNotificationManager.getInstance().showNotification(context, message);
+                    notificationFactory.createAndShowAnimatedCarousel(context, message);
                     break;
 
                 case Carousel:
-//                    notificationFactory.createAndShowCarousel(context, message);
-                    BlueshiftNotificationManager.getInstance().showNotification(context, message);
+                    notificationFactory.createAndShowCarousel(context, message);
                     break;
 
                 case GifNotification:

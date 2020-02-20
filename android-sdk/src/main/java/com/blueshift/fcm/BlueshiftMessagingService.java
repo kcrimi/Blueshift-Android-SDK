@@ -17,6 +17,7 @@ import android.util.Log;
 import com.blueshift.Blueshift;
 import com.blueshift.BlueshiftConstants;
 import com.blueshift.BlueshiftLogger;
+import com.blueshift.BlueshiftNotificationManager;
 import com.blueshift.BuildConfig;
 import com.blueshift.inappmessage.InAppApiCallback;
 import com.blueshift.inappmessage.InAppManager;
@@ -229,7 +230,8 @@ public class BlueshiftMessagingService extends FirebaseMessagingService {
                          */
                         SdkLog.i(LOG_TAG, "A silent push received.");
                     } else {
-                        NotificationFactory.handleMessage(this, message);
+                        BlueshiftNotificationManager.getInstance().showNotification(this, message);
+//                        NotificationFactory.handleMessage(this, message);
                     }
                 } else {
                     Log.e(LOG_TAG, "Null message found in push message.");
